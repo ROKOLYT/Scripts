@@ -7,7 +7,7 @@ param(
 )
 
 
-$EssentialPackages = @("GoogleChrome", "Firefox", "7zip", "git", "jre8", "pyenv-win", "miniconda3", "openssl", "SQLite", "tor-browser", "vscode", "jetbrainstoolbox", "blender")
+$EssentialPackages = @("GoogleChrome", "Firefox", "7zip", "git", "jre8", "pyenv-win", "miniconda3", "openssl", "SQLite", "tor-browser", "vscode", "jetbrainstoolbox", "blender", "mingw", "make")
 $GamePackages = @("discord", "epicgameslauncher", "steam", "valorant", "messenger")
 $QoLPackages = @("betterdiscord", "hwinfo", "lghub", "msiafterburner", "obs", "steelseries-engine")
 
