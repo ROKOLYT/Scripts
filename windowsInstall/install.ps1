@@ -59,7 +59,7 @@ function InstallDiscordPlugins {
         $finalPath = $outputPath + $DiscordPluginsNames[$i]
         
         Invoke-WebRequest -Uri $DiscordPluginsUrls[$i] -OutFile $finalPath -UseBasicParsing
-        Start-Sleep -Seconds 1
+        Start-Sleep -Seconds 2 # Evade anti-ddos ban
     }
 
     # Copy discord theme
