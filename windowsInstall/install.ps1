@@ -6,7 +6,7 @@ param(
     [string]$install = "all"
 )
 
-$EssentialPackages = @("GoogleChrome", "Firefox", "7zip", "git", "jre8", "pyenv-win", "miniconda3", "openssl", "SQLite", "tor-browser", "vscode", "jetbrainstoolbox", "blender")
+$EssentialPackages = @("GoogleChrome", "Firefox", "7zip", "git", "jre8", "pyenv-win", "miniconda3", "openssl", "SQLite", "tor-browser", "vscode", "jetbrainstoolbox", "blender", "make", "mingw")
 $GamePackages = @("discord", "epicgameslauncher", "steam", "valorant", "messenger")
 $QoLPackages = @("betterdiscord", "hwinfo", "lghub", "msiafterburner", "obs", "steelseries-engine")
 $DiscordPluginsUrls = @("https://betterdiscord.app/Download?id=245", "https://betterdiscord.app/Download?id=81", "https://betterdiscord.app/Download?id=184")
@@ -59,7 +59,7 @@ function InstallDiscordPlugins {
         $finalPath = $outputPath + $DiscordPluginsNames[$i]
         
         Invoke-WebRequest -Uri $DiscordPluginsUrls[$i] -OutFile $finalPath -UseBasicParsing
-        Start-Sleep -Seconds 1
+        Start-Sleep -Seconds 2 # Evade anti-ddos ban
     }
 
     # Copy discord theme
