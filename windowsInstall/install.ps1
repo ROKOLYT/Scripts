@@ -70,13 +70,21 @@ function InstallDiscordPlugins {
     Copy-Item -Path $sourcePath -Destination $outputPath
 }
 
+function OpenSteam {
+    $steamPath = "C:\Program Files (x86)\Steam\steam.exe"
+    Start-Process -FilePath $steamPath
+}
+
 if ($args -contains "--help" -or @("all", "qol", "game", "essential") -contains -not $install) {
     Write-Host "Usage: ./run.ps1 -install [all, game, qol, essential, default: all]"
     Exit 0
 }
+
 
 DownloadChoco
 
 InstallPackages
 
 InstallDiscordPlugins
+
+OpenSteam
