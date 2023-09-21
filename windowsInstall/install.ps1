@@ -10,9 +10,15 @@ $EssentialPackages = @("GoogleChrome", "Firefox", "7zip", "git", "jre8", "pyenv-
 $GamePackages = @("discord", "epicgameslauncher", "steam", "valorant", "messenger")
 $QoLPackages = @("hwinfo", "lghub", "msiafterburner", "obs", "steelseries-engine")
 $VencordCLI = "https://github.com/Vencord/Installer/releases/latest/download/VencordInstallerCli.exe"
-$DiscordPath = "$env:LOCALAPPDATA\Discord\app-1.0.9018\Discord.exe"
+$global:DiscordRootPath = "$env:LOCALAPPDATA\Discord\"
+$global:DiscordPath = Get-ChildItem -Path $DiscordRootPath -Filter "Discord.exe" -File -Recurse | Select-Object -First 1
+$DiscordPath = $DiscordPath.FullName
 $StartMenuPath = "$env:LOCALAPPDATA\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\LocalState\start2.bin"
 
+function RefreshDiscordPath {
+    $global:DiscordPath = Get-ChildItem -Path $DiscordRootPath -Filter "Discord.exe" -File -Recurse | Select-Object -First 1
+    $global:DiscordPath = $DiscordPath.FullName
+}
 
 function RefreshEnviroment {
     # Refresh Enviroment to make sure all newly installed packages work
@@ -52,6 +58,13 @@ function InstallPackages {
 }
 
 function InstallVencord {
+    RefreshDiscordPath
+    # Launch discord for it to fully install
+    Start-Process -FilePath $DiscordPath
+    Start-Sleep 20
+
+    RefreshDiscordPath
+
     # Initialize input for installation process [Selects option 1]
     @"
     1
@@ -69,6 +82,9 @@ function InstallVencord {
     # Install Vencord
     Start-Process -Wait -NoNewWindow -FilePath "$outfile" -ArgumentList "-install" -RedirectStandardInput "config\input.txt"
 
+    # Restore keybinds
+    Copy-Item -Path "config\000004.log" -Destination "$env:APPDATA\discord\Local Storage\leveldb\"
+
     # Launch Discord
     Start-Process powershell -WindowStyle Hidden -ArgumentList "-NoExit -Command `"& '$DiscordPath'`""
 
@@ -77,6 +93,17 @@ function InstallVencord {
 function ConfigureWindowsSettings {
     # Load preconfigured pinned apps
     Copy-Item -Path "config\start2.bin" -Destination $StartMenuPath
+
+    $StartupPath = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\Firefox.lnk"
+    $FirefoxPath = "$env:PROGRAMFILES\Mozilla Firefox\firefox.exe"
+
+    # Create a Wscript Shell object
+    $WshShell = New-Object -ComObject Wscript.Shell
+
+    # Add firefox to startup
+    $Shortcut = $WshShell.CreateShortcut($StartupPath)
+    $Shortcut.TargetPath = $FirefoxPath
+    $Shortcut.Save()
 }
 
 Check for correct usage
