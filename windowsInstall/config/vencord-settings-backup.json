@@ -5,7 +5,7 @@
         "autoUpdateNotification": true,
         "useQuickCss": true,
         "themeLinks": [
-            "https://raw.githubusercontent.com/ROKOLYT/Scripts/main/windowsInstall/discordtheme.theme.css"
+            "https://raw.githubusercontent.com/ROKOLYT/Scripts/main/windowsInstall/config/discordtheme.theme.css"
         ],
         "enabledThemes": [],
         "enableReactDevtools": false,
