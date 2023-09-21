@@ -8,22 +8,26 @@ param(
 
 $EssentialPackages = @("GoogleChrome", "Firefox", "7zip", "git", "jre8", "pyenv-win", "miniconda3", "openssl", "SQLite", "tor-browser", "vscode", "jetbrainstoolbox", "blender", "make", "mingw")
 $GamePackages = @("discord", "epicgameslauncher", "steam", "valorant", "messenger")
-$QoLPackages = @("betterdiscord", "hwinfo", "lghub", "msiafterburner", "obs", "steelseries-engine")
-$DiscordPluginsUrls = @("https://betterdiscord.app/Download?id=245", "https://betterdiscord.app/Download?id=81", "https://betterdiscord.app/Download?id=184")
-$DiscordPluginsNames = @("FreeEmojis.plugin.js", "Translator.plugin.js", "BetterVolume.plugin.js")
+$QoLPackages = @("hwinfo", "lghub", "msiafterburner", "obs", "steelseries-engine")
+$VencordCLI = "https://github.com/Vencord/Installer/releases/latest/download/VencordInstallerCli.exe"
+$DiscordPath = "C:\Users\jassz\AppData\Local\Discord\app-1.0.9018\Discord.exe"
+$StartMenuPath = "C:\Users\jassz\AppData\Local\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\LocalState\start2.bin"
 
 
 function RefreshEnviroment {
+    # Refresh Enviroment to make sure all newly installed packages work
     Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
     refreshenv
 }
 
 function DownloadChoco {
-    Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+    # Install Chocolatey
+    Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
     RefreshEnviroment
 }
 
 function InstallPackages {
+    # Install packages based on needs
     foreach ($Package in $EssentialPackages) {
         choco install $Package -y
         RefreshEnviroment
@@ -47,29 +51,35 @@ function InstallPackages {
     }
 }
 
-function InstallDiscordPlugins {
-    if ($DiscordPluginsUrls.Count -eq -not $DiscordPluginsNames.Count) {
-        Write-Host "Failed to install discord plugins. Make sure the urls, and names are correct"
-        return
-    }
+function InstallVencord {
+    # Initialize input for installation process [Selects option 1]
+    @"
+    1
+"@ | Set-Content -Path "input.txt"
 
-    # Install discord plugins
-    $outputPath = $env:APPDATA + "\BetterDiscord\plugins\"
-    for ($i = 0; $i -lt $DiscordPluginsUrls.Count; $i++) {
-        $finalPath = $outputPath + $DiscordPluginsNames[$i]
-        
-        Invoke-WebRequest -Uri $DiscordPluginsUrls[$i] -OutFile $finalPath -UseBasicParsing
-        Start-Sleep -Seconds 2 # Evade anti-ddos ban
-    }
+    # Download installer
+    $outfile = "$env:TEMP\$(([uri]$VencordCLI).Segments[-1])"
 
-    # Copy discord theme
-    $filePath = "discordtheme.theme.css"
-    $outputPath = $env:APPDATA + "\BetterDiscord\themes\" + $filePath
-    $sourcePath = $PSScriptRoot + "\" + $filePath
-    
-    Copy-Item -Path $sourcePath -Destination $outputPath
+    Write-Output "Downloading installer to $outfile"
+
+    Invoke-WebRequest -Uri "$VencordCLI" -OutFile "$outfile"
+
+    Write-Output ""
+
+    # Install Vencord
+    Start-Process -Wait -NoNewWindow -FilePath "$outfile" -ArgumentList "-install" -RedirectStandardInput input.txt
+
+    # Launch Discord
+    Start-Process powershell -WindowStyle Hidden -ArgumentList "-NoExit -Command `"& '$DiscordPath'`""
+
 }
 
+function ConfigureWindowsSettings {
+    # Load preconfigured pinned apps
+    Copy-Item -Path "D:\.Programs\Scripts\windowsInstall\start2.bin" -Destination $StartMenuPath
+}
+
+# Check for correct usage
 if ($args -contains "--help" -or @("all", "qol", "game", "essential") -contains -not $install) {
     Write-Host "Usage: ./run.ps1 -install [all, game, qol, essential, default: all]"
     Exit 0
@@ -79,4 +89,6 @@ DownloadChoco
 
 InstallPackages
 
-InstallDiscordPlugins
+InstallVencord
+
+ConfigureWindowsSettings
