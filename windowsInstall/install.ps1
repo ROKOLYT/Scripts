@@ -10,8 +10,8 @@ $EssentialPackages = @("GoogleChrome", "Firefox", "7zip", "git", "jre8", "pyenv-
 $GamePackages = @("discord", "epicgameslauncher", "steam", "valorant", "messenger")
 $QoLPackages = @("hwinfo", "lghub", "msiafterburner", "obs", "steelseries-engine")
 $VencordCLI = "https://github.com/Vencord/Installer/releases/latest/download/VencordInstallerCli.exe"
-$DiscordPath = "C:\Users\jassz\AppData\Local\Discord\app-1.0.9018\Discord.exe"
-$StartMenuPath = "C:\Users\jassz\AppData\Local\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\LocalState\start2.bin"
+$DiscordPath = "$env:LOCALAPPDATA\Discord\app-1.0.9018\Discord.exe"
+$StartMenuPath = "$env:LOCALAPPDATA\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\LocalState\start2.bin"
 
 
 function RefreshEnviroment {
@@ -55,7 +55,7 @@ function InstallVencord {
     # Initialize input for installation process [Selects option 1]
     @"
     1
-"@ | Set-Content -Path "input.txt"
+"@ | Set-Content -Path "config\input.txt"
 
     # Download installer
     $outfile = "$env:TEMP\$(([uri]$VencordCLI).Segments[-1])"
@@ -67,7 +67,7 @@ function InstallVencord {
     Write-Output ""
 
     # Install Vencord
-    Start-Process -Wait -NoNewWindow -FilePath "$outfile" -ArgumentList "-install" -RedirectStandardInput input.txt
+    Start-Process -Wait -NoNewWindow -FilePath "$outfile" -ArgumentList "-install" -RedirectStandardInput "config\input.txt"
 
     # Launch Discord
     Start-Process powershell -WindowStyle Hidden -ArgumentList "-NoExit -Command `"& '$DiscordPath'`""
@@ -76,10 +76,10 @@ function InstallVencord {
 
 function ConfigureWindowsSettings {
     # Load preconfigured pinned apps
-    Copy-Item -Path "D:\.Programs\Scripts\windowsInstall\start2.bin" -Destination $StartMenuPath
+    Copy-Item -Path "config\start2.bin" -Destination $StartMenuPath
 }
 
-# Check for correct usage
+Check for correct usage
 if ($args -contains "--help" -or @("all", "qol", "game", "essential") -contains -not $install) {
     Write-Host "Usage: ./run.ps1 -install [all, game, qol, essential, default: all]"
     Exit 0
