@@ -11,6 +11,7 @@ $EssentialPackages = @("GoogleChrome", "Firefox", "git", "pyenv-win", "openssl",
 $GamePackages = @("discord", "epicgameslauncher", "steam", "valorant", "messenger")
 $QoLPackages = @("hwinfo", "lghub", "obs")
 $VencordCLI = "https://github.com/Vencord/Installer/releases/latest/download/VencordInstallerCli.exe"
+$ModrinthURL = "https://launcher-files.modrinth.com/versions/0.8.9/windows/Modrinth%20App_0.8.9_x64-setup.exe"
 $global:DiscordRootPath = "$env:LOCALAPPDATA\Discord\"
 $global:DiscordPath = Get-ChildItem -Path $DiscordRootPath -Filter "Discord.exe" -File -Recurse | Select-Object -First 1
 $DiscordPath = $DiscordPath.FullName
@@ -88,6 +89,16 @@ function InstallVencord {
     $process.WaitForExit()
 }
 
+function DownloadModrinth {
+    Write-Output "Downloading Modrinth..."
+
+    # Download Modrinth installer
+    $outfile = "$env:USERPROFILE\downloads\$(([uri]$ModrinthURL).Segments[-1])"
+    Invoke-WebRequest -Uri "$ModrinthURL" -OutFile $outfile
+
+    Write-Warning "Modrinth downloaded! MAKE SURE TO INSTALL IT!"
+}
+
 # Check for correct usage
 if ($args -contains "--help" -or @("all", "qol", "game", "essential") -contains -not $install) {
     Write-Host "Usage: ./run.ps1 -install [all, game, qol, essential, default: all]"
@@ -95,10 +106,12 @@ if ($args -contains "--help" -or @("all", "qol", "game", "essential") -contains 
 }
 
 
-DownloadChoco
+# DownloadChoco
 
-InstallPackages
+# InstallPackages
 
-InstallVencord
+# InstallVencord
+
+DownloadModrinth
 
 # ConfigureWindowsSettings
